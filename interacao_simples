@@ -1,0 +1,39 @@
+#include <CurieNeuralNetwork.h>
+
+void setup() {
+  Serial.begin(9600);
+  while (!Serial);
+
+  Serial.println("Inicializando rede neural...");
+  NeuralNetwork.begin();
+  NeuralNetwork.reset();
+
+  // Treinamento: classe 0 (baixo)
+  int baixo1[] = {10, 12, 9};
+  int baixo2[] = {13, 15, 11};
+  NeuralNetwork.learn(baixo1, 3, 0);
+  NeuralNetwork.learn(baixo2, 3, 0);
+
+  // Treinamento: classe 1 (médio)
+  int medio1[] = {48, 51, 50};
+  int medio2[] = {55, 52, 49};
+  NeuralNetwork.learn(medio1, 3, 1);
+  NeuralNetwork.learn(medio2, 3, 1);
+
+  // Treinamento: classe 2 (alto)
+  int alto1[] = {92, 88, 95};
+  int alto2[] = {85, 89, 91};
+  NeuralNetwork.learn(alto1, 3, 2);
+  NeuralNetwork.learn(alto2, 3, 2);
+
+  // Classificação de uma nova entrada
+  int nova_entrada[] = {89, 90, 93};  // Esperado: classe 2
+  int classe = NeuralNetwork.classify(nova_entrada, 3);
+
+  Serial.print("Classe detectada: ");
+  Serial.println(classe);
+}
+
+void loop() {
+  // Nada no loop
+}
