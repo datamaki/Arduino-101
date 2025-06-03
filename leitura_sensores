@@ -1,0 +1,87 @@
+#include <CurieNeuralNetwork.h>
+
+enum Estado {
+  AGUARDANDO_1,
+  AGUARDANDO_2,
+  AGUARDANDO_3,
+  CLASSIFICAR,
+  PERGUNTAR_REPETIR
+};
+
+Estado estado = AGUARDANDO_1;
+int vetor[3];
+int indice = 0;
+
+void setup() {
+  Serial.begin(9600);
+  while (!Serial);
+
+  NeuralNetwork.begin();
+  NeuralNetwork.reset();
+
+  Serial.println("Rede Neural iniciada.");
+  Serial.println("Treinando...");
+
+  // Dados de treinamento
+  int baixo1[] = {10, 12, 9}, baixo2[] = {13, 15, 11};
+  NeuralNetwork.learn(baixo1, 3, 0);
+  NeuralNetwork.learn(baixo2, 3, 0);
+
+  int medio1[] = {48, 51, 50}, medio2[] = {55, 52, 49};
+  NeuralNetwork.learn(medio1, 3, 1);
+  NeuralNetwork.learn(medio2, 3, 1);
+
+  int alto1[] = {92, 88, 95}, alto2[] = {85, 89, 91};
+  NeuralNetwork.learn(alto1, 3, 2);
+  NeuralNetwork.learn(alto2, 3, 2);
+
+  Serial.println("Vamos classificar um vetor.");
+  Serial.println("Digite o primeiro valor:");
+}
+
+void loop() {
+  if (Serial.available()) {
+    String entrada = Serial.readStringUntil('\n');
+    entrada.trim();
+
+    switch (estado) {
+      case AGUARDANDO_1:
+        vetor[0] = entrada.toInt();
+        Serial.println("Digite o segundo valor:");
+        estado = AGUARDANDO_2;
+        break;
+
+      case AGUARDANDO_2:
+        vetor[1] = entrada.toInt();
+        Serial.println("Digite o terceiro valor:");
+        estado = AGUARDANDO_3;
+        break;
+
+      case AGUARDANDO_3:
+        vetor[2] = entrada.toInt();
+        estado = CLASSIFICAR;
+        break;
+
+      case PERGUNTAR_REPETIR:
+        if (entrada == "s" || entrada == "S") {
+          Serial.println("Digite o primeiro valor:");
+          estado = AGUARDANDO_1;
+        } else {
+          Serial.println("Encerrando classificação.");
+          estado = PERGUNTAR_REPETIR; // permanece aqui
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    if (estado == CLASSIFICAR) {
+      int classe = NeuralNetwork.classify(vetor, 3);
+      Serial.print("Classe detectada: ");
+      Serial.println(classe);
+      Serial.println("Deseja tentar outro vetor? (s/n)");
+      estado = PERGUNTAR_REPETIR;
+    }
+  }
+}
